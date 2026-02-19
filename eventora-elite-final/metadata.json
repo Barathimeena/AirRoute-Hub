@@ -1,0 +1,8 @@
+{
+  "name": "Eventora Elite",
+  "description": "Premium event booking platform with AI recommendations, real-time seat selection, and map integration.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}
