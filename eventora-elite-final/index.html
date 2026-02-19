@@ -4,65 +4,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eventora Elite | Premium Aviation</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>AirRoute-Hub | Flight Booking</title>
+
     <style>
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #020617;
-            color: #f8fafc;
-            overflow-x: hidden;
-            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f6f9;
         }
-        .app-bg {
-            position: fixed;
-            top: 0;
 
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to bottom, rgba(2, 6, 23, 0.8), rgba(2, 6, 23, 0.95)), 
-                        url('https://images.unsplash.com/photo-1436491865332-7a61a109c0f3?auto=format&fit=crop&q=80&w=2070');
-            background-size: cover;
-            background-position: center;
-            z-index: -1;
+        header {
+            background: #1e3a8a;
+            color: white;
+            padding: 15px;
+            text-align: center;
         }
-        .glass {
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+
+        .container {
+            padding: 20px;
         }
-        .text-glow {
-            text-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
+
+        .search-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        @media print {
-            .no-print { display: none !important; }
-            .print-only { display: block !important; }
-            body { background: white; color: black; }
+
+        input, select, button {
+            padding: 10px;
+            margin: 8px;
+            width: 200px;
         }
-        .print-only { display: none; }
-        
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #020617; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+
+        button {
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #3749c7;
+        }
+
+        .flights {
+            margin-top: 20px;
+        }
+
+        .flight-card {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .hidden {
+            display: none;
+        }
     </style>
-<script type="importmap">
-{
-  "imports": {
-    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
-    "@google/genai": "https://esm.sh/@google/genai@^1.39.0",
-    "react/": "https://esm.sh/react@^19.2.4/",
-    "react": "https://esm.sh/react@^19.2.4"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
 </head>
+
 <body>
-    <div class="app-bg"></div>
-    <div id="root"></div>
-<script type="module" src="/index.tsx"></script>
+
+<header>
+    <h1>✈️ AirRoute-Hub</h1>
+    <p>Smart Flight Booking System</p>
+</header>
+
+<div class="container">
+
+    <!-- Search Section -->
+    <div class="search-box">
+        <h2>Search Flights</h2>
+
+        <input type="text" id="from" placeholder="From">
+        <input type="text" id="to" placeholder="To">
+        <input type="date" id="date">
+
+        <button onclick="searchFlights()">Search</button>
+    </div>
+
+    <!-- Flight Results -->
+    <div class="flights" id="flightResults"></div>
+
+    <!-- Booking Section -->
+    <div id="bookingSection" class="hidden">
+        <h2>Book Ticket</h2>
+
+        <input type="text" id="name" placeholder="Passenger Name">
+
+        <h3>Select Food</h3>
+        <label><input type="checkbox" value="200"> Meal - ₹200</label><br>
+        <label><input type="checkbox" value="100"> Snacks - ₹100</label><br>
+        <label><input type="checkbox" value="50"> Drink - ₹50</label><br>
+
+        <br>
+        <button onclick="confirmBooking()">Confirm Booking</button>
+    </div>
+
+    <!-- Receipt -->
+    <div id="receiptSection" class="hidden">
+        <h2>Receipt</h2>
+        <p id="receiptText"></p>
+        <button onclick="downloadReceipt()">Download Receipt</button>
+    </div>
+
+</div>
+
+<script>
+    const flights = [
+        { name: "IndiGo 101", from: "Chennai", to: "Madurai", price: 2500 },
+        { name: "Air India 202", from: "Chennai", to: "Coimbatore", price: 3000 },
+        { name: "SpiceJet 303", from: "Chennai", to: "Trichy", price: 2200 }
+    ];
+
+    let selectedFlight = null;
+
+    function searchFlights() {
+        const from = document.getElementById("from").value;
+        const to = document.getElementById("to").value;
+
+        const results = flights.filter(f => f.from === from && f.to === to);
+
+        const container = document.getElementById("flightResults");
+        container.innerHTML = "";
+
+        if (results.length === 0) {
+            container.innerHTML = "<p>No flights found</p>";
+            return;
+        }
+
+        results.forEach(flight => {
+            const div = document.createElement("div");
+            div.className = "flight-card";
+
+            div.innerHTML = `
+                <div>
+                    <h3>${flight.name}</h3>
+                    <p>${flight.from} → ${flight.to}</p>
+                    <p>₹${flight.price}</p>
+                </div>
+                <button onclick="selectFlight('${flight.name}')">Book</button>
+            `;
+
+            container.appendChild(div);
+        });
+    }
+
+    function selectFlight(name) {
+        selectedFlight = flights.find(f => f.name === name);
+        document.getElementById("bookingSection").classList.remove("hidden");
+    }
+
+    function confirmBooking() {
+        const name = document.getElementById("name").value;
+
+        let foodCost = 0;
+        document.querySelectorAll('input[type="checkbox"]:checked')
+            .forEach(item => foodCost += parseInt(item.value));
+
+        const total = selectedFlight.price + foodCost;
+
+        document.getElementById("receiptText").innerText =
+            `Passenger: ${name}\nFlight: ${selectedFlight.name}\nTotal: ₹${total}`;
+
+        document.getElementById("receiptSection").classList.remove("hidden");
+    }
+
+    function downloadReceipt() {
+        const text = document.getElementById("receiptText").innerText;
+
+        const blob = new Blob([text], { type: "text/plain" });
+        const link = document.createElement("a");
+
+        link.href = URL.createObjectURL(blob);
+        link.download = "receipt.txt";
+        link.click();
+
+        // FIX: prevent UI freeze
+        setTimeout(() => {
+            URL.revokeObjectURL(link.href);
+        }, 100);
+    }
+</script>
+
 </body>
 </html>
